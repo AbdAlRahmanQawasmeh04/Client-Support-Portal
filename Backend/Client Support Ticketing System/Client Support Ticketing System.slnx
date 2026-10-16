@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Client Support Ticketing System/Client Support Ticketing System.csproj" />
+  <Project Path="SupportTicketingSystem.DataAccess/SupportTicketingSystem.DataAccess.csproj" Id="4c025824-80fb-4851-9c8c-46da704df873" />
+</Solution>

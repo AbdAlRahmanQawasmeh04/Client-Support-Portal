@@ -1,0 +1,25 @@
+<div class="shell">
+ <aside class="sidebar"><div class="brand"><span>S</span>Support Portal</div><p class="eyebrow">MANAGER WORKSPACE</p><nav><a class="active" routerLink="/manager/dashboard" aria-current="page">◫ &nbsp; Overview</a><a routerLink="/manager/tickets">▦ &nbsp; All tickets</a><a routerLink="/manager/clients">◎ &nbsp; Clients</a><a routerLink="/manager/employees">◇ &nbsp; Employees</a><a routerLink="/manager/products">▤ &nbsp; Systems</a></nav><div class="side-note"><h2>A clear view.<br>A stronger team.</h2><p>See the workload, follow progress and keep support moving.</p></div><div class="account"><span class="avatar">{{auth.user()?.fullName?.slice(0,1)}}</span><div><strong>{{auth.user()?.fullName}}</strong><small>Support manager</small></div></div></aside>
+ <div class="body"><header><span>SUPPORT MANAGEMENT</span><button type="button" (click)="logout()">Sign out ↗</button></header><main>
+ <div class="heading"><div><p class="eyebrow">THE BIG PICTURE</p><h1>Support overview</h1><p class="muted">Your requests, people and progress in one place.</p></div><button type="button" (click)="load()" [disabled]="loading()">{{loading()?'Refreshing…':'↻ Refresh'}}</button></div>
+ @if(error()){<p class="error" role="alert">{{error()}} @if(data()){<span>The last successful figures remain below.</span>}</p>}
+ @if(loading() && !data()){<div class="card" role="status">Loading dashboard…</div>}
+ @if(data();as info){
+ <p class="updated">Updated {{info.generatedAt|date:'medium'}} · All-time totals unless stated otherwise</p>
+ <section class="stats" aria-label="Support totals">
+ <article class="stat"><span class="icon">▦</span><div><p>Total tickets</p><strong>{{info.totalTickets}}</strong><a routerLink="/manager/tickets">View all tickets →</a></div></article>
+ <article class="stat"><span class="icon amber">◷</span><div><p>Open tickets</p><strong>{{open()}}</strong><small>New, assigned and paused</small></div></article>
+ <article class="stat"><span class="icon green">✓</span><div><p>Closed tickets</p><strong>{{closed()}}</strong><small>{{percentage(closed())}}% of all tickets</small></div></article>
+ <article class="stat"><span class="icon purple">◎</span><div><p>Clients / Employees</p><strong>{{info.totalClients}} / {{info.totalEmployees}}</strong><small>{{info.activeClients}} active clients · {{info.activeEmployees}} active employees</small></div></article>
+ </section>
+ <div class="charts"><section class="card"><div class="section-heading"><h2>Tickets created</h2><span>Last 12 months · UTC</span></div><p class="muted">Monthly request volume</p><div class="chart-scroll" role="region" tabindex="0" aria-label="Monthly ticket counts"><div class="bars">
+ @for(month of info.ticketsByMonth;track month.year+'-'+month.month){<div class="bar-column"><div class="track"><div class="bar" [style.height.%]="month.createdTickets/monthlyMax()*100" [attr.aria-label]="monthLabel(month.year,month.month)+': '+month.createdTickets+' tickets'"><span>{{month.createdTickets}}</span></div></div><small>{{monthLabel(month.year,month.month)}}</small></div>}
+ </div></div></section>
+ <section class="card"><h2>Tickets by status</h2><p class="muted">Distribution across all requests</p>@for(status of info.statusCounts;track status.status){<div class="status-row"><div><span>{{status.status}}</span><strong>{{status.count}} <small>({{percentage(status.count)}}%)</small></strong></div><div class="meter"><span [class.closed]="status.status==='Closed'" [class.paused]="status.status==='Paused'" [style.width.%]="percentage(status.count)"></span></div></div>}@if(info.totalTickets===0){<p class="muted">No tickets yet.</p>}</section></div>
+ <section class="card"><div class="section-heading"><h2>Employee workload</h2><span>{{info.totalEmployees}} employees</span></div><p class="muted">Closed counts reflect tickets currently assigned to each employee.</p><div class="table-scroll" role="region" tabindex="0" aria-label="Employee workload"><table><thead><tr><th>Employee</th><th>Account</th><th>Assigned total</th><th>Open</th><th>Closed</th></tr></thead><tbody>@for(employee of info.employeeProductivity;track employee.employeeId){<tr><td><span class="initial" aria-hidden="true">{{employee.fullName.slice(0,1)}}</span>{{employee.fullName}}</td><td><span class="badge" [class.inactive]="!employee.isActive">{{employee.isActive?'Active':'Inactive'}}</span></td><td>{{employee.assignedTickets}}</td><td>{{employee.openTickets}}</td><td>{{employee.closedTickets}}</td></tr>}@empty{<tr><td colspan="5">No support employees yet.</td></tr>}</tbody></table></div></section>
+ }
+ </main></div>
+</div>
+
+
+

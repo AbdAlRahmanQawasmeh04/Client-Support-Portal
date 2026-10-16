@@ -1,0 +1,382 @@
+:host {
+  display: block;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #112e45;
+}
+
+* { box-sizing: border-box; }
+
+a,
+button,
+h1,
+h2,
+strong {
+  font-family: inherit;
+}
+
+.workspace {
+  background: #f4f7fb;
+  min-height: calc(100dvh - 76px);
+}
+
+main {
+  max-width: 1500px;
+  padding: 26px 28px 40px;
+  margin: auto;
+}
+
+.welcome {
+  padding: 6px 0 20px;
+}
+
+.eyebrow {
+  font-size: 9px;
+  font-weight: 700;
+  color: #138899;
+  letter-spacing: 1.8px;
+  margin: 0 0 10px;
+}
+
+h1 {
+  font-size: clamp(23px, 2vw, 30px);
+  letter-spacing: -.8px;
+  line-height: 1.4;
+  margin: 0;
+  font-weight: 700;
+}
+
+h1 span { color: #1764a4; }
+
+.welcome p:not(.eyebrow) {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #647e91;
+  margin: 8px 0 0;
+}
+
+.hero-action { display: none; }
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0 0 27px;
+}
+
+.quick-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 15px;
+  border: 1px solid #e0e8ef;
+  background: white;
+  border-radius: 11px;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 3px 12px #152b4504;
+}
+
+a.quick-card:hover {
+  border-color: #5acbd6;
+  background: #fcfeff;
+}
+
+.quick-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 39px;
+  height: 41px;
+  border-radius: 9px;
+  font-size: 25px;
+}
+
+.blue {
+  color: white;
+  background: #1375ee;
+}
+
+.cyan {
+  color: #068a9f;
+  background: #e3f8f8;
+}
+
+.violet {
+  color: #6c63cf;
+  background: #f0edfe;
+}
+
+.quick-card strong {
+  display: block;
+  font-size: 12px;
+}
+
+.quick-card small {
+  display: block;
+  margin-top: 5px;
+  font-size: 11px;
+  color: #647e91;
+  line-height: 1.5;
+}
+
+.quick-arrow {
+  margin-left: auto;
+  color: #5d819a;
+}
+
+.count-card strong { font-size: 19px; }
+
+.count-card em {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 17px;
+  scroll-margin-top: 20px;
+}
+
+.heading .eyebrow {
+  margin-bottom: 5px;
+  font-size: 8px;
+}
+
+.heading h2 {
+  font-size: 22px;
+  margin: 0;
+  letter-spacing: -.5px;
+}
+
+.heading p:last-child {
+  color: #647e91;
+  font-size: 12px;
+  margin: 7px 0 0;
+}
+
+button {
+  border: 1px solid #d6e2ec;
+  border-radius: 8px;
+  padding: 10px 13px;
+  background: white;
+  color: #31516b;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: .5;
+  cursor: default;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid #19b6d0;
+  outline-offset: 3px;
+}
+
+.card {
+  background: white;
+  border: 1px solid #dfe8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px #193c5604;
+}
+
+.card-title {
+  padding: 18px 20px;
+  font-size: 13px;
+  font-weight: 650;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  border-bottom: 1px solid #edf2f6;
+}
+
+.card-title span {
+  font-size: 11px;
+  font-weight: 500;
+  color: #536e85;
+  background: #f1f5f9;
+  padding: 5px 9px;
+  border-radius: 6px;
+}
+
+.table-scroll { overflow-x: auto; }
+
+table {
+  width: 100%;
+  min-width: 700px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+th {
+  background: #f8fafc;
+  text-align: start;
+  color: #58738c;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 13px 14px;
+  border-bottom: 1px solid #e9eff5;
+}
+
+td {
+  padding: 18px 14px;
+  border-bottom: 1px solid #edf2f6;
+  line-height: 1.7;
+}
+
+tbody tr:last-child td { border-bottom: 0; }
+
+tbody tr:hover { background: #fafcfe; }
+
+.ticket-id a {
+  color: #1476bc;
+  text-decoration: none;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.ticket-id a:hover { text-decoration: underline; }
+
+.description {
+  min-width: 180px;
+  max-width: 320px;
+  overflow-wrap: anywhere;
+}
+
+.date {
+  white-space: nowrap;
+  color: #637c90;
+  font-size: 11px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 6px;
+  padding: 5px 9px;
+  background: #eaf3ff;
+  color: #2265c0;
+  font-size: 10px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.badge:before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.badge.closed {
+  background: #e6f8f0;
+  color: #0d8861;
+}
+
+.badge.paused {
+  background: #fff5df;
+  color: #9a6204;
+}
+
+.notice {
+  padding: 28px 20px;
+  color: #647e91;
+  font-size: 13px;
+}
+
+.error { color: #a42335; }
+
+.pagination {
+  padding: 16px 20px;
+  border-top: 1px solid #edf2f6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: #536e85;
+}
+
+@media (max-width: 1100px) {
+  .quick-card {
+    gap: 9px;
+    padding: 15px 12px;
+  }
+
+  .quick-arrow { display: none; }
+
+  .quick-card small { font-size: 10px; }
+
+  .quick-icon {
+    width: 32px;
+    height: 36px;
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 950px) {
+  .quick-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .count-card {
+    grid-column: 1 / -1;
+    padding: 12px 15px;
+  }
+
+  .count-card > span:last-child {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .count-card small { margin: 0; }
+}
+
+@media (max-width: 800px) {
+  main { padding: 22px 20px; }
+
+  .quick-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .count-card { grid-column: auto; }
+
+  .count-card > span:last-child { display: block; }
+
+  .count-card small { margin-top: 5px; }
+}
+
+@media (max-width: 600px) {
+  main { padding: 20px 14px; }
+
+  .quick-actions {
+    grid-template-columns: 1fr;
+    gap: 9px;
+    margin-bottom: 22px;
+  }
+
+  .quick-card { padding: 13px 15px; }
+
+  .quick-card small { font-size: 11px; }
+
+  .quick-arrow { display: block; }
+
+  .heading { align-items: flex-start; }
+
+  .heading p:last-child {
+    max-width: 190px;
+    line-height: 1.6;
+  }
+}

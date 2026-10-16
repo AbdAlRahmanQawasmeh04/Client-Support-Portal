@@ -1,0 +1,129 @@
+<div class="workspace">
+  <main>
+    <a class="back-link" routerLink="/my-tickets">← Back to my tickets</a>
+    <p class="eyebrow">CLIENT WORKSPACE</p>
+
+    <h1>Edit ticket</h1>
+
+    <p class="subtitle">
+      Update the product or describe your issue more clearly.
+    </p>
+
+    <section class="card">
+      <div class="form-intro"><span class="form-icon" aria-hidden="true">✎</span><div><h2>Update your request</h2><p>Keep the details clear so your support team can help. Fields marked * are required.</p></div></div>
+      @if (loading()) {
+        <p role="status">Loading ticket…</p>
+      } @else if (loadError()) {
+        <p class="error" role="alert">
+          {{ loadError() }}
+        </p>
+
+        <button type="button" (click)="load()">
+          Try again
+        </button>
+      } @else if (ticket(); as item) {
+        @if (item.status === 'Closed') {
+          <p>This ticket is closed and cannot be edited.</p>
+
+          <a [routerLink]="['/my-tickets', id]">
+            Back to ticket #{{ id }}
+          </a>
+        } @else {
+          <p class="ticket-number">Ticket #{{ id }}</p>
+
+          @if (item.isConfirmedByClient) {
+            <p class="hint">
+              Changing the product or description resets
+              your previous solution confirmation.
+            </p>
+          }
+
+          <form [formGroup]="form" (ngSubmit)="submit()">
+            <fieldset
+              [disabled]="saving() || saved() || needsReload()"
+            >
+              <label for="product">
+                Product <span>*</span>
+              </label>
+
+              <select
+                id="product"
+                formControlName="productId"
+              >
+                <option [ngValue]="0" disabled>
+                  Select a product
+                </option>
+
+                @for (product of products(); track product.id) {
+                  <option [ngValue]="product.id">
+                    {{ product.name }}
+                  </option>
+                }
+              </select>
+
+              <label for="description">
+                Problem description <span>*</span>
+              </label>
+
+              <textarea
+                id="description" dir="auto" aria-describedby="description-count"
+                formControlName="problemDescription"
+                rows="7"
+                maxlength="5000"
+              ></textarea>
+
+              <p id="description-count" class="hint count">
+                {{ form.controls.problemDescription.value.length }}
+                / 5,000 characters
+              </p>
+
+              <div class="actions">
+                <button
+                  type="button"
+                  [routerLink]="['/my-tickets', id]"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  class="primary"
+                  [disabled]="!form.dirty || saving()"
+                >
+                  {{ saving() ? 'Saving…' : 'Save changes' }}
+                </button>
+              </div>
+            </fieldset>
+          </form>
+
+          @if (error()) {
+            <p class="message error" role="alert">
+              {{ error() }}
+            </p>
+          }
+
+          @if (needsReload()) {
+            <p class="hint">
+              Reload the latest ticket before editing again.
+              Reloading replaces your unsaved changes.
+            </p>
+
+            <button type="button" (click)="load()">
+              Reload ticket
+            </button>
+          }
+
+          @if (saved()) {
+            <p class="success" role="status">
+              Changes saved.
+
+              <a [routerLink]="['/my-tickets', id]">
+                View ticket
+              </a>
+            </p>
+          }
+        }
+      }
+    </section>
+  </main>
+</div>

@@ -1,0 +1,291 @@
+<div class="workspace">
+  
+
+  <main><a class="back-link" routerLink="/assigned-tickets">← Back to assigned tickets</a>
+    @if (loading()) {
+      <p class="card" role="status">
+        Loading ticket…
+      </p>
+    } @else if (pageError()) {
+      <section class="card" role="alert">
+        <p class="error">{{ pageError() }}</p>
+
+        <button type="button" (click)="load()">
+          Try again
+        </button>
+      </section>
+    } @else if (ticket(); as item) {
+      <div class="heading">
+        <div>
+          <p class="eyebrow">SUPPORT REQUEST</p>
+          <h1>Ticket #{{ item.id }}</h1>
+        </div>
+
+        <span
+          class="badge"
+          [class.closed]="item.status === 'Closed'" [class.paused]="item.status === 'Paused'" [class.assigned]="item.status === 'Assigned'"
+        >
+          {{ item.status }}
+        </span>
+      </div>
+
+      @if (actionError()) {
+        <p class="message error" role="alert">
+          {{ actionError() }}
+        </p>
+      }
+
+      @if (success()) {
+        <p class="message success" role="status">
+          {{ success() }}
+        </p>
+      }
+
+      <div class="layout">
+        <div>
+          <section class="card">
+            <h2>Problem description</h2>
+
+            <p class="content" dir="auto">
+              {{ item.problemDescription }}
+            </p>
+          </section>
+
+          <section class="card">
+            <h2>Conversation</h2>
+
+            @if (commentsBusy()) {
+              <p role="status">Loading comments…</p>
+            } @else if (commentsError()) {
+              <p class="error" role="alert">
+                {{ commentsError() }}
+              </p>
+
+              <button
+                type="button"
+                (click)="loadComments()"
+              >
+                Retry comments
+              </button>
+            } @else if (comments(); as page) {
+              @for (entry of page.items; track entry.id) {
+                <article class="comment">
+                  <div class="comment-heading">
+                    <strong>
+                      {{ entry.authorName }}
+                    </strong>
+
+                    <small>
+                      #{{ entry.id }} ·
+                      {{ entry.createdAt | date:'medium' }}
+                    </small>
+                  </div>
+
+                  @if (entry.parentCommentId) {
+                    <small>
+                      Reply to comment #{{ entry.parentCommentId }}
+                    </small>
+                  }
+
+                  <p class="content" dir="auto">
+                    {{ entry.content }}
+                  </p>
+
+                  @if (item.status !== 'Closed') {
+                    <button
+                      type="button"
+                      class="reply"
+                      [disabled]="saving()"
+                      (click)="replyTo.set(entry)"
+                    >
+                      Reply
+                    </button>
+                  }
+                </article>
+              } @empty {
+                <p class="muted">No comments yet.</p>
+              }
+
+              @if (page.totalPages > 1) {
+                <nav
+                  class="pagination"
+                  aria-label="Comment pages"
+                >
+                  <button
+                    type="button"
+                    [disabled]="page.pageNumber <= 1"
+                    (click)="loadComments(page.pageNumber - 1)"
+                  >
+                    Previous
+                  </button>
+
+                  <span>
+                    {{ page.pageNumber }} / {{ page.totalPages }}
+                  </span>
+
+                  <button
+                    type="button"
+                    [disabled]="page.pageNumber >= page.totalPages"
+                    (click)="loadComments(page.pageNumber + 1)"
+                  >
+                    Next
+                  </button>
+                </nav>
+              }
+            }
+
+            @if (item.status === 'Closed') {
+              <p class="closed-note">
+                This ticket is closed.
+                Its conversation is read-only.
+              </p>
+            } @else {
+              <form
+                (submit)="$event.preventDefault(); sendComment()"
+              >
+                @if (replyTo(); as reply) {
+                  <div class="reply-note">
+                    Replying to {{ reply.authorName }}
+                    (#{{ reply.id }})
+
+                    <button
+                      type="button"
+                      [disabled]="saving()"
+                      (click)="replyTo.set(null)"
+                    >
+                      Cancel reply
+                    </button>
+                  </div>
+                }
+
+                <label for="comment">
+                  Your message
+                </label>
+
+                <textarea
+                  id="comment" dir="auto"
+                  [formControl]="comment"
+                  [readOnly]="saving()"
+                  rows="4"
+                  maxlength="5000"
+                  placeholder="Write an update or reply…"
+                ></textarea>
+
+                <button
+                  class="primary"
+                  type="submit"
+                  [disabled]="saving() || commentsBusy() || !comment.value.trim()"
+                >
+                  {{ saving() ? 'Please wait…' : 'Send comment' }}
+                </button>
+              </form>
+            }
+          </section>
+        </div>
+
+        <aside>
+          <section class="card">
+            <h2>Ticket information</h2>
+
+            <dl>
+              <dt>Client</dt>
+              <dd>{{ item.clientName }}</dd>
+
+              <dt>Solution ready</dt>
+              <dd>
+                {{ item.isResolvedByEmployee ? 'Yes' : 'Not yet' }}
+              </dd>
+
+              <dt>Product</dt>
+              <dd>{{ item.productName }}</dd>
+
+              <dt>Assigned to</dt>
+              <dd>
+                {{ item.assignedEmployeeName || 'Not assigned' }}
+              </dd>
+
+              <dt>Created</dt>
+              <dd>
+                {{ item.createdAt | date:'mediumDate' }}
+              </dd>
+
+              <dt>Solution confirmed</dt>
+              <dd>
+                {{ item.isConfirmedByClient ? 'Yes' : 'Not yet' }}
+              </dd>
+            </dl>
+          </section>
+
+          <section class="card">
+            <h2>Attachments</h2>
+
+            @for (file of item.attachments; track file.id) {
+              <button
+                class="attachment"
+                type="button"
+                [disabled]="downloading() !== null"
+                (click)="download(file)"
+              >
+                {{
+                  downloading() === file.id
+                    ? 'Downloading…'
+                    : 'Download: ' + file.fileName
+                }}
+              </button>
+            } @empty {
+              <p class="muted">No attachments.</p>
+            }
+          </section>
+
+          @if (item.status !== 'Closed') {
+            <section class="card">
+              <h2>Ticket actions</h2>
+
+              <div class="actions">
+                <button
+                  type="button"
+                  [disabled]="saving() || item.status === 'Assigned'"
+                  (click)="updateTicket('Assigned')"
+                >
+                  Resume work
+                </button>
+
+                <button
+                  type="button"
+                  [disabled]="saving() || item.status === 'Paused'"
+                  (click)="updateTicket('Paused')"
+                >
+                  Pause ticket
+                </button>
+
+                <button
+                  type="button"
+                  [disabled]="saving() || item.isResolvedByEmployee"
+                  (click)="updateTicket('resolve')"
+                >
+                  Mark solution ready
+                </button>
+
+                <button
+                  type="button"
+                  class="primary"
+                  [disabled]="saving() || !item.isConfirmedByClient"
+                  (click)="updateTicket('close')"
+                >
+                  Close ticket
+                </button>
+              </div>
+
+              @if (!item.isConfirmedByClient) {
+                <p class="muted">
+                  The client must confirm the solution
+                  before you can close this ticket.
+                </p>
+              }
+            </section>
+          }
+        </aside>
+      </div>
+    }
+  </main>
+</div>

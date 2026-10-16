@@ -1,0 +1,151 @@
+<div class="workspace">
+  <main>
+    <a class="back-link" routerLink="/my-tickets">← Back to my tickets</a>
+    <p class="eyebrow">CLIENT WORKSPACE</p>
+
+    <h1>New ticket</h1>
+
+    <p class="subtitle">
+      Tell us what happened.
+      You can submit another issue while your other tickets are still open. Each ticket has its own conversation and status.
+    </p>
+
+    <section class="card">
+      <div class="form-intro"><span class="form-icon" aria-hidden="true">＋</span><div><h2>Tell us how we can help</h2><p>Choose your system and describe the issue. Fields marked * are required.</p></div></div>
+      @if (loading()) {
+        <p role="status">Loading products…</p>
+      } @else if (productsError()) {
+        <p class="error" role="alert">
+          {{ productsError() }}
+        </p>
+
+        <button type="button" (click)="loadProducts()">
+          Try again
+        </button>
+      } @else if (products().length === 0) {
+        <p>
+          No products are available.
+          Contact your support manager.
+        </p>
+
+        <button type="button" (click)="loadProducts()">
+          Refresh products
+        </button>
+      } @else {
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <fieldset
+            [disabled]="saving() || createdId() !== null"
+          >
+            <label for="product">
+              Product <span>*</span>
+            </label>
+
+            <select
+              id="product"
+              formControlName="productId"
+            >
+              <option [ngValue]="0" disabled>
+                Select a product
+              </option>
+
+              @for (product of products(); track product.id) {
+                <option [ngValue]="product.id">
+                  {{ product.name }}
+                </option>
+              }
+            </select>
+
+            <label for="description">
+              Problem description <span>*</span>
+            </label>
+
+            <textarea
+              id="description" dir="auto" aria-describedby="description-count"
+              formControlName="problemDescription"
+              rows="6"
+              maxlength="5000"
+              placeholder="Describe the issue and the steps that caused it."
+            ></textarea>
+
+            <p id="description-count" class="hint count">
+              {{ form.controls.problemDescription.value.length }}
+              / 5,000 characters
+            </p>
+
+            <label for="attachments">
+              Attachments <small>(optional)</small>
+            </label>
+
+            <p class="hint" id="file-help">
+              Up to 5 files. PDF, PNG or JPG.
+              Maximum 5 MB per file.
+              Choosing again replaces your selection.
+            </p>
+
+            <input
+              id="attachments"
+              type="file"
+              multiple
+              accept=".pdf,.png,.jpg,.jpeg"
+              aria-describedby="file-help"
+              (change)="selectFiles($event)"
+            >
+
+            @if (filesError()) {
+              <p class="error" role="alert">
+                {{ filesError() }}
+              </p>
+            }
+
+            <ul>
+              @for (file of files(); track $index) {
+                <li>{{ file.name }}</li>
+              }
+            </ul>
+
+            @if (files().length || filesError()) {
+              <button
+                type="button"
+                class="secondary"
+                (click)="clearFiles()"
+              >
+                Clear attachments
+              </button>
+            }
+
+            @if (error()) {
+              <p class="message error" role="alert">
+                {{ error() }}
+              </p>
+            }
+
+            <div class="actions">
+              <button
+                type="submit"
+                class="primary"
+                [disabled]="saving() || !!filesError()"
+              >
+                {{ saving() ? 'Submitting…' : 'Submit ticket' }}
+              </button>
+            </div>
+          </fieldset>
+        </form>
+      }
+
+      @if (createdId(); as id) {
+        <p class="success" role="status">
+          Ticket created successfully.
+
+          <a [routerLink]="['/my-tickets', id]">
+            View ticket #{{ id }}
+          </a>
+        </p>
+      }
+    </section>
+
+    <p class="hint footer-note">
+      New tickets are sent to your support manager for assignment.
+    </p>
+  </main>
+</div>
+

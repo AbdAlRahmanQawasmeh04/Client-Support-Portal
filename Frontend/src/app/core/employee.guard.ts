@@ -1,0 +1,16 @@
+import { inject } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
+import { AuthService } from './auth.service';
+
+export const employeeGuard: CanActivateFn = () => {
+  const user = inject(AuthService).user();
+
+  if (
+    user?.accessToken &&
+    user.role === 'SupportEmployee'
+  ) {
+    return true;
+  }
+
+  return inject(Router).createUrlTree(['/login']);
+};

@@ -1,0 +1,40 @@
+<main class="registration">
+  <aside class="intro">
+    <a class="brand" routerLink="/login"><span>S</span> Support Portal</a>
+    <div><p class="eyebrow">YOUR SUPPORT STARTS HERE</p><h1>A better connection.<br>A clearer answer.</h1><p>Create your client account to submit requests, follow conversations and stay updated.</p></div>
+    <p class="intro-footer">Your systems. Your team. Your support.</p>
+  </aside>
+  <section class="panel" aria-labelledby="register-title">
+    <a class="back" routerLink="/login">← Back to sign in</a>
+    <p class="eyebrow">WELCOME TO YOUR WORKSPACE</p><h2 id="register-title">Create your account</h2>
+    @if (done()) {
+      <div class="success" role="status"><h3>Your account is ready</h3><p>You can now sign in with the username and password you chose.</p><a class="primary link-button" routerLink="/login">Continue to sign in →</a></div>
+    } @else {
+      <p class="subtitle">Register as a client. All fields are required except your photo.</p>
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <fieldset [disabled]="busy()">
+          <div class="photo-picker">
+            @if (preview()) { <img [src]="preview()" alt="Selected profile photo preview"> } @else { <span class="avatar" aria-hidden="true">{{ form.controls.fullName.value.trim().slice(0,1) || 'U' }}</span> }
+            <div><label for="photo">Profile photo <small>(optional)</small></label><p id="photo-help">JPG or PNG, up to 2 MB.</p><input #photoInput id="photo" type="file" accept=".jpg,.jpeg,.png" aria-describedby="photo-help photo-error" (change)="selectImage($event)">
+            @if (preview() || imageError()) { <button type="button" class="remove" (click)="removeImage(photoInput)">Remove photo</button> }</div>
+          </div>
+          <p id="photo-error" class="error" role="alert">{{ imageError() }}</p>
+          <div class="grid">
+            <div><label for="fullName">Full name</label><input id="fullName" formControlName="fullName" autocomplete="name" dir="auto" [attr.aria-invalid]="invalid('fullName')">@if(invalid('fullName')){<p class="error">Enter your full name.</p>}</div>
+            <div><label for="username">Username</label><input id="username" formControlName="username" autocomplete="username" [attr.aria-invalid]="invalid('username')">@if(invalid('username')){<p class="error">Choose a username.</p>}</div>
+            <div><label for="email">Email</label><input id="email" type="email" dir="ltr" lang="en" formControlName="email" autocomplete="email" [attr.aria-invalid]="invalid('email')">@if(invalid('email')){<p class="error">Enter a valid email.</p>}</div>
+            <div><label for="mobile">Mobile number</label><input id="mobile" type="tel" dir="ltr" lang="en" formControlName="mobileNumber" autocomplete="tel" [attr.aria-invalid]="invalid('mobileNumber')">@if(invalid('mobileNumber')){<p class="error">Enter a valid phone number using digits 0-9.</p>}</div>
+            <div><label for="dob">Date of birth</label><input id="dob" type="text" lang="en" dir="ltr" placeholder="YYYY-MM-DD" maxlength="10" aria-describedby="birth-date-help" formControlName="dateOfBirth" autocomplete="bday"  [attr.aria-invalid]="invalid('dateOfBirth')"><small id="birth-date-help">YYYY-MM-DD (example: 2000-12-31)</small>@if(invalid('dateOfBirth')){<p class="error">Enter a valid date in YYYY-MM-DD format, no later than today.</p>}</div>
+            <div><label for="address">Address</label><input id="address" formControlName="address" autocomplete="street-address" dir="auto" [attr.aria-invalid]="invalid('address')">@if(invalid('address')){<p class="error">Enter your address.</p>}</div>
+            <div><label for="password">Password</label><input id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password" autocomplete="new-password" aria-describedby="password-help" [attr.aria-invalid]="invalid('password')"><small id="password-help">Use at least 8 characters.</small>@if(invalid('password')){<p class="error">Enter at least 8 characters.</p>}</div>
+            <div><label for="confirm">Confirm password</label><input id="confirm" [type]="showPassword() ? 'text' : 'password'" formControlName="confirmPassword" autocomplete="new-password" [attr.aria-invalid]="invalid('confirmPassword')">@if(invalid('confirmPassword')){<p class="error">Repeat your password.</p>}</div>
+          </div>
+          <button type="button" class="remove" [attr.aria-pressed]="showPassword()" (click)="showPassword.set(!showPassword())">{{ showPassword() ? 'Hide passwords' : 'Show passwords' }}</button>
+          @if(error()){<p class="message error" role="alert">{{ error() }}</p>}
+          <button type="submit" class="primary submit" [disabled]="busy()">{{ busy() ? 'Creating account…' : 'Create account →' }}</button>
+        </fieldset>
+      </form>
+      <p class="sign-in">Already have an account? <a routerLink="/login">Sign in</a></p>
+    }
+  </section>
+</main>

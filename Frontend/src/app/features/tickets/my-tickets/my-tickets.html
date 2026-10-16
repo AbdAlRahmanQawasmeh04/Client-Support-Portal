@@ -1,0 +1,204 @@
+<div class="workspace">
+  <main>
+    <section class="welcome" aria-label="Welcome">
+      <div>
+        <p class="eyebrow">YOUR SUPPORT, SIMPLIFIED</p>
+
+        <h1>
+          Welcome back,
+          <span>{{ auth.user()?.fullName }}.</span>
+        </h1>
+
+        <p>
+          A little help. A clear answer.
+          Everything in one place.
+        </p>
+
+        <a class="hero-action" routerLink="/my-tickets/new">
+          Create a support request
+          <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </section>
+
+    <div class="quick-actions">
+      <a routerLink="/my-tickets/new" class="quick-card">
+        <span class="quick-icon blue" aria-hidden="true">
+          ＋
+        </span>
+
+        <span>
+          <strong>Submit a ticket</strong>
+          <small>Tell us how we can help</small>
+        </span>
+
+        <span class="quick-arrow" aria-hidden="true">↗</span>
+      </a>
+
+      <a
+        href="#ticket-list"
+        class="quick-card"
+        (click)="$event.preventDefault(); ticketList.scrollIntoView({ block: 'start' }); ticketList.focus({ preventScroll: true })"
+      >
+        <span class="quick-icon cyan" aria-hidden="true">
+          ▤
+        </span>
+
+        <span>
+          <strong>Track your requests</strong>
+          <small>Follow every conversation</small>
+        </span>
+
+        <span class="quick-arrow" aria-hidden="true">↓</span>
+      </a>
+
+      <div class="quick-card count-card" aria-live="polite">
+        <span class="quick-icon violet" aria-hidden="true">
+          ▦
+        </span>
+
+        <span>
+          <strong>
+            {{ result()?.totalCount ?? '—' }}
+            <em>total tickets</em>
+          </strong>
+
+          <small>Your support history</small>
+        </span>
+      </div>
+    </div>
+
+    <div
+      #ticketList
+      class="heading"
+      id="ticket-list"
+      tabindex="-1"
+    >
+      <div>
+        <p class="eyebrow">STAY IN THE LOOP</p>
+
+        <h2>My tickets</h2>
+
+        <p>
+          Your requests, conversations and latest updates.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        [disabled]="loading()"
+        (click)="load(requestedPage())"
+      >
+        <span aria-hidden="true">↻</span>
+        {{ loading() ? 'Refreshing…' : 'Refresh' }}
+      </button>
+    </div>
+
+    <section class="card" aria-label="Your tickets">
+      @if (loading()) {
+        <p class="notice" role="status">
+          Loading your tickets…
+        </p>
+      } @else if (error()) {
+        <div class="notice error" role="alert">
+          <p>{{ error() }}</p>
+
+          <button
+            type="button"
+            (click)="load(requestedPage())"
+          >
+            Try again
+          </button>
+        </div>
+      } @else if (result(); as page) {
+        <div class="card-title">
+          Support requests
+          <span>{{ page.totalCount }} total</span>
+        </div>
+
+        @if (page.items.length === 0) {
+          <p class="notice">
+            No tickets to display.
+          </p>
+        } @else {
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ticket</th>
+                  <th>Product</th>
+                  <th>Description</th>
+                  <th>Status</th>
+                  <th>Assigned to</th>
+                  <th>Created</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                @for (ticket of page.items; track ticket.id) {
+                  <tr>
+                    <td class="ticket-id">
+                      <a [routerLink]="['/my-tickets', ticket.id]">
+                        #{{ ticket.id }}
+                      </a>
+                    </td>
+
+                    <td dir="auto">
+                      {{ ticket.productName }}
+                    </td>
+
+                    <td class="description" dir="auto">
+                      {{ ticket.problemDescription }}
+                    </td>
+
+                    <td>
+                      <span
+                        class="badge"
+                        [class.closed]="ticket.status === 'Closed'"
+                        [class.paused]="ticket.status === 'Paused'"
+                      >
+                        {{ ticket.status }}
+                      </span>
+                    </td>
+
+                    <td>
+                      {{ ticket.assignedEmployeeName || 'Not assigned' }}
+                    </td>
+
+                    <td class="date">
+                      {{ ticket.createdAt | date:'mediumDate' }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        @if (page.totalPages > 1) {
+          <nav class="pagination" aria-label="Ticket pages">
+            <button
+              type="button"
+              [disabled]="page.pageNumber <= 1"
+              (click)="load(page.pageNumber - 1)"
+            >
+              Previous
+            </button>
+
+            <span>
+              Page {{ page.pageNumber }} of {{ page.totalPages }}
+            </span>
+
+            <button
+              type="button"
+              [disabled]="page.pageNumber >= page.totalPages"
+              (click)="load(page.pageNumber + 1)"
+            >
+              Next
+            </button>
+          </nav>
+        }
+      }
+    </section>
+  </main>
+</div>

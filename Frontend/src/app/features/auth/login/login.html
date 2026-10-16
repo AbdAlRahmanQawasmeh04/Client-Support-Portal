@@ -1,0 +1,125 @@
+<main class="login-page">
+  <section class="intro" aria-labelledby="brand-title">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">S</span>
+      Support Portal
+    </div>
+
+    <div class="intro-content">
+      <p class="eyebrow">CLIENT SUPPORT TICKETING SYSTEM</p>
+
+      <h1 id="brand-title">
+        Better support.<br>
+        One place.
+      </h1>
+
+      <p class="intro-text">
+        Stay connected with your support team, follow your tickets
+        and get the help you need.
+      </p>
+
+      <div class="benefit">
+        <span aria-hidden="true">01</span>
+        <div>
+          <h2>Submit a request</h2>
+          <p>Tell us what you need help with.</p>
+        </div>
+      </div>
+
+      <div class="benefit">
+        <span aria-hidden="true">02</span>
+        <div>
+          <h2>Keep the conversation going</h2>
+          <p>Share updates with your support team.</p>
+        </div>
+      </div>
+
+      <div class="benefit">
+        <span aria-hidden="true">03</span>
+        <div>
+          <h2>Follow every update</h2>
+          <p>Track your ticket from start to resolution.</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="intro-footer">
+      Your products. Your team. Your support.
+    </p>
+  </section>
+
+  <section class="form-panel" aria-labelledby="login-title">
+    <div class="login-card">
+      <span class="section-label">WELCOME BACK</span>
+
+      <h2 id="login-title">Sign in</h2>
+
+      <p class="subtitle">
+        Enter your details to access your account.
+      </p>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <label for="username">Username or email</label>
+
+        <input
+          id="username"
+          type="text"
+          formControlName="usernameOrEmail"
+          autocomplete="username"
+          placeholder="Enter your username or email"
+          required
+        >
+
+        <label for="password">Password</label>
+
+        <div class="password-field">
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            autocomplete="current-password"
+            placeholder="Enter your password"
+            required
+          >
+
+          <button
+            type="button"
+            class="toggle"
+            (click)="showPassword.set(!showPassword())"
+            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+            [attr.aria-pressed]="showPassword()"
+          >
+            {{ showPassword() ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+
+        @if (error()) {
+          <p class="message error" role="alert">
+            {{ error() }}
+          </p>
+        }
+
+        @if (signedInUser(); as user) {
+          <p class="message success" role="status">
+            Signed in successfully. Welcome, {{ user.fullName }}!
+            <br>
+            Role: {{ user.role }}
+          </p>
+        }
+
+        <button
+          class="submit"
+          type="submit"
+          [disabled]="busy()"
+        >
+          {{ busy() ? 'Signing in…' : 'Sign in' }}
+          <span aria-hidden="true">→</span>
+        </button>
+      </form>
+
+      <p class="help"><a routerLink="/forgot-password">Forgot password?</a></p><p class="help">New here? <a routerLink="/register">Create a client account</a></p><p class="help">
+        Need help with your account? Contact your support manager.
+      </p>
+    </div>
+  </section>
+</main>

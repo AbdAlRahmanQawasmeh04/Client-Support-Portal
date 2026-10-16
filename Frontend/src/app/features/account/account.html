@@ -1,0 +1,42 @@
+<main class="account-page" lang="en" dir="ltr">
+  <p class="eyebrow">YOUR PROFILE &amp; SECURITY</p><h1>My account</h1>
+  @if(success()){<p class="success" role="status">{{success()}}</p>}
+  @if(error()){<p class="error" role="alert">{{error()}}</p>}
+  @if(signedOut()) { <a class="primary" routerLink="/login">Sign in again</a> }
+  @else if(loading()){<p role="status">Loading your account…</p>}
+  @else if(account(); as user){
+    <div class="account-grid">
+      <section class="card"><h2>Profile photo</h2>
+        @if(photo()){<img class="photo" [src]="photo()" alt="Your profile photo">} @else {<span class="avatar" aria-hidden="true">{{user.fullName.slice(0,1)}}</span>}
+        <p>JPG or PNG, up to 2 MB.</p>
+        <label class="upload" for="account-photo">Choose photo</label><input class="file-input" id="account-photo" type="file" accept="image/jpeg,image/png" [disabled]="busy()" (change)="upload($event)">
+        @if(user.hasImage){<button type="button" [disabled]="busy()" (click)="removePhoto()">Remove photo</button>}
+        @if(photoError()){<p class="error">{{photoError()}}</p><button type="button" [disabled]="busy()" (click)="loadPhoto()">Retry photo</button>}
+        <dl><dt>Username</dt><dd>{{user.username}}</dd><dt>Current email</dt><dd dir="ltr">{{user.email}}</dd><dt>Date of birth</dt><dd>{{user.dateOfBirth.slice(0,10)}}</dd></dl>
+      </section>
+      <section class="card"><h2>Personal details</h2>
+        <form [formGroup]="profile" (ngSubmit)="saveProfile()" novalidate><fieldset [disabled]="busy()">
+          <label for="account-name">Full name</label><input id="account-name" formControlName="fullName" autocomplete="name" maxlength="150">
+          <label for="account-phone">Mobile number</label><input id="account-phone" type="tel" dir="ltr" formControlName="mobileNumber" autocomplete="tel" maxlength="25">
+          <label for="account-address">Address</label><input id="account-address" formControlName="address" autocomplete="street-address" maxlength="500">
+          <button class="primary" type="submit" [disabled]="busy() || !profile.dirty">Save details</button>
+        </fieldset></form>
+      </section>
+      <section class="card"><h2>Change password</h2><p>Use 8 to 128 characters. You will need to sign in again after changing your password.</p>
+        <form [formGroup]="password" (ngSubmit)="changePassword()" novalidate><fieldset [disabled]="busy()">
+          <label for="current-password">Current password</label><input id="current-password" type="password" formControlName="currentPassword" autocomplete="current-password" maxlength="1024">
+          <label for="new-password">New password</label><input id="new-password" type="password" formControlName="newPassword" autocomplete="new-password" maxlength="128">
+          <label for="confirm-password">Confirm new password</label><input id="confirm-password" type="password" formControlName="confirmPassword" autocomplete="new-password" maxlength="128">
+          <button class="primary" type="submit" [disabled]="busy()">Change password</button>
+        </fieldset></form>
+      </section>
+      <section class="card"><h2>Change email</h2><p>We will send a confirmation link to your new address. Your current email stays active until you confirm. The link expires in 15 minutes.</p>
+        <form [formGroup]="email" (ngSubmit)="changeEmail()" novalidate><fieldset [disabled]="busy()">
+          <label for="new-email">New email address</label><input id="new-email" type="email" dir="ltr" formControlName="newEmail" autocomplete="email" maxlength="254">
+          <label for="email-password">Current password</label><input id="email-password" type="password" formControlName="currentPassword" autocomplete="current-password" maxlength="1024">
+          <button class="primary" type="submit" [disabled]="busy()">Send confirmation link</button>
+        </fieldset></form>
+      </section>
+    </div>
+  } @else { <button type="button" (click)="load()">Retry loading account</button> }
+</main>

@@ -1,0 +1,35 @@
+<div class="manager-shell">
+  <aside class="sidebar"><div class="brand"><span>S</span>Support Portal</div><p class="eyebrow">MANAGER WORKSPACE</p><a class="overview-link" routerLink="/manager/dashboard">◫ &nbsp; Overview</a><a class="nav-active" routerLink="/manager/tickets" aria-current="page">▦ &nbsp; All tickets</a><a class="overview-link" routerLink="/manager/clients">◎ &nbsp; Clients</a><a class="overview-link" routerLink="/manager/employees">◇ &nbsp; Employees</a><a class="overview-link" routerLink="/manager/products">▤ &nbsp; Systems</a><div class="side-note"><h2>Clear priorities.<br>Connected teams.</h2><p>Connect every request with the right support employee.</p></div><div class="account"><span class="avatar">{{auth.user()?.fullName?.slice(0,1)}}</span><div><strong>{{auth.user()?.fullName}}</strong><small>Support manager</small></div></div></aside>
+  <div class="body"><header><span>SUPPORT MANAGEMENT</span><button type="button" (click)="logout()" [disabled]="saving()">Sign out ↗</button></header>
+    <main><div class="heading"><div><p class="eyebrow">YOUR TEAM, IN SYNC</p><h1>All tickets</h1><p class="subtitle">Review client requests and assign the right person to help.</p></div><button type="button" (click)="load()" [disabled]="loading() || saving()">↻ Refresh</button></div>
+      @if(success()){<p class="success message" role="status">{{success()}}</p>}
+      <section class="card filters" aria-label="Ticket filters"><form [formGroup]="filters" (ngSubmit)="applyFilters()"><fieldset [disabled]="saving()"><div class="filter-grid">
+        <div class="search"><label for="search">Search description or system</label><input id="search" formControlName="search" maxlength="200" placeholder="Search requests…"></div>
+        <div><label for="status">Status</label><select id="status" formControlName="status"><option value="">All statuses</option><option value="New">New</option><option value="Assigned">Assigned</option><option value="Paused">Paused</option><option value="Closed">Closed</option></select></div>
+        <div><label for="product">System</label><select id="product" formControlName="productId"><option value="">All systems</option>@for(product of products();track product.id){<option [value]="product.id">{{product.name}}</option>}</select></div>
+        <div><label for="employee">Employee</label><select id="employee" formControlName="employeeId"><option value="">All employees</option>@for(employee of employees();track employee.id){<option [value]="employee.id">{{employee.fullName}}{{employee.isActive?'':' (inactive)'}}</option>}</select></div>
+      <div><label for="client">Client</label><select id="client" formControlName="clientId"><option value="">All clients</option>@for(client of clients();track client.id){<option [value]="client.id">{{client.fullName}}</option>}</select></div></div><div class="filter-actions"><button class="primary" type="submit">Apply filters</button><button type="button" (click)="resetFilters()">Reset</button></div></fieldset></form>
+      @if(clientsError()){<p class="error" role="alert">{{clientsError()}} <button type="button" (click)="loadClients()">Retry clients</button></p>} @if(productsError()){<p class="error" role="alert">{{productsError()}} <button type="button" (click)="loadProducts()">Retry systems</button></p>}
+      @if(peopleError()){<p class="error" role="alert">{{peopleError()}} <button type="button" (click)="loadEmployees()">Retry employees</button></p>}
+      </section>
+      <section class="card ticket-list" aria-labelledby="list-title"><div class="list-heading"><h2 id="list-title">Support requests</h2>@if(result();as page){<span>{{page.totalCount}} matching tickets</span>}</div>
+      @if(loading()){<p class="empty" role="status">Loading tickets…</p>}@else if(error()){<div class="empty" role="alert"><p>{{error()}}</p><button type="button" (click)="load()">Try again</button></div>}@else if(result();as page){
+        @if(page.items.length){<div class="table-scroll" tabindex="0" role="region" aria-label="Tickets table"><table><thead><tr><th>Ticket / Client</th><th>System / Description</th><th>Status</th><th>Assigned to</th><th>Created</th><th>Action</th></tr></thead><tbody>
+          @for(ticket of page.items;track ticket.id){<tr><td><a class="ticket-id" [routerLink]="['/manager/tickets',ticket.id]">#{{ticket.id}}</a><span class="client-name" dir="auto">{{ticket.clientName}}</span></td><td><strong dir="auto">{{ticket.productName}}</strong><p class="description" dir="auto">{{ticket.problemDescription}}</p></td><td><span class="badge" [class.closed]="ticket.status==='Closed'" [class.paused]="ticket.status==='Paused'" [class.assigned]="ticket.status==='Assigned'">{{ticket.status}}</span></td><td dir="auto">{{ticket.assignedEmployeeName || 'Not assigned'}}</td><td>{{ticket.createdAt|date:'mediumDate'}}</td><td>@if(ticket.status!=='Closed'){<button type="button" [disabled]="saving() || peopleLoading() || !!peopleError()" (click)="openAssignment(ticket); assignmentPanel.focus()">{{ticket.assignedEmployeeId?'Reassign':'Assign'}}</button>}@else{<span class="muted">Closed</span>}</td></tr>}
+        </tbody></table></div>}@else{<div class="empty"><h3>No matching tickets</h3><p>Try changing or clearing the filters.</p></div>}
+        @if(page.totalPages>1){<nav class="pagination" aria-label="Ticket pages"><button type="button" [disabled]="page.pageNumber<=1 || saving()" (click)="load(page.pageNumber-1)">Previous</button><span>{{page.pageNumber}} / {{page.totalPages}}</span><button type="button" [disabled]="page.pageNumber>=page.totalPages || saving()" (click)="load(page.pageNumber+1)">Next</button></nav>}
+      }
+      </section>
+      <section #assignmentPanel tabindex="-1" class="assignment-anchor" aria-label="Ticket assignment">
+      @if(selected();as ticket){<div class="card assignment"><div class="list-heading"><h2>Assign ticket #{{ticket.id}}</h2><button type="button" (click)="closeAssignment()" [disabled]="saving()">Cancel</button></div><p class="muted">Client: {{ticket.clientName}} · {{ticket.productName}}</p><p class="full-description" dir="auto">{{ticket.problemDescription}}</p><p class="notice">Changing the employee sets the ticket to Assigned and resets previous solution confirmations.</p><form (submit)="$event.preventDefault(); assign()"><label for="assignee">Active support employee</label><select id="assignee" [formControl]="assignee" [attr.disabled]="saving() ? '' : null"><option [ngValue]="0">Select an employee</option>@for(employee of employees();track employee.id){@if(employee.isActive){<option [ngValue]="employee.id">{{employee.fullName}}</option>}}</select>@if(assignmentError()){<p class="error" role="alert">{{assignmentError()}}</p>}<button class="primary save" type="submit" [disabled]="saving() || !assignee.value || assignee.value===ticket.assignedEmployeeId">{{saving()?'Saving…':'Confirm assignment'}}</button></form></div>}
+      </section>
+    </main>
+  </div>
+</div>
+
+
+
+
+
+
+

@@ -1,0 +1,42 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand"><span>S</span>Support Portal</div>
+    <p class="eyebrow">MANAGER WORKSPACE</p>
+    <nav aria-label="Manager navigation">
+      <a routerLink="/manager/dashboard">◫ &nbsp; Overview</a>
+      <a routerLink="/manager/tickets">▦ &nbsp; All tickets</a>
+      <a routerLink="/manager/clients">◎ &nbsp; Clients</a>
+      <a routerLink="/manager/employees">◎ &nbsp; Employees</a>
+      <a routerLink="/manager/products" class="active" aria-current="page">▤ &nbsp; Systems</a>
+    </nav>
+    <div class="side-note"><h2>Your systems.<br>Connected support.</h2><p>Explore the systems available for client support requests.</p></div>
+    <div class="account"><div><strong>{{ auth.user()?.fullName }}</strong><small>Support manager</small></div></div>
+  </aside>
+  <div class="body">
+    <header><span>SUPPORT MANAGEMENT</span><button type="button" (click)="logout()">Sign out ↗</button></header>
+    <main>
+      <div class="heading">
+        <div><p class="eyebrow">YOUR SYSTEM DIRECTORY</p><h1>Systems</h1><p class="muted">Systems clients can choose when submitting a support request.</p></div>
+        <button type="button" (click)="load()" [disabled]="loading()">↻ Refresh</button>
+      </div>
+      <section class="card search-card" aria-label="Search systems">
+        <label for="system-search">Search by system name</label>
+        <div class="search-row"><input #searchBox id="system-search" type="search" maxlength="200" placeholder="Find a system…" [value]="search()" (input)="search.set(searchBox.value)"><button type="button" [disabled]="!search()" (click)="search.set(''); searchBox.focus()">Clear</button></div>
+      </section>
+      @if (error()) { <p class="error" role="alert">{{ error() }} <button type="button" (click)="load()" [disabled]="loading()">Retry</button></p> }
+      @if (loading()) { <p role="status">Loading systems…</p> }
+      @if (products() !== null) {
+        <section aria-label="Available systems" [attr.aria-busy]="loading()">
+          <div class="section-heading results"><h2>Available systems</h2><span role="status">{{ filtered().length }} of {{ products()?.length }} systems</span></div>
+          <div class="system-grid">
+            @for (product of filtered(); track product.id) {
+              <article class="card system-card"><span class="system-icon" aria-hidden="true">▤</span><div><p class="muted">System #{{ product.id }}</p><h2 dir="auto">{{ product.name }}</h2></div></article>
+            } @empty {
+              <p class="card empty">{{ products()?.length ? 'No systems match your search. Try another name.' : 'No systems are available yet.' }}</p>
+            }
+          </div>
+        </section>
+      }
+    </main>
+  </div>
+</div>

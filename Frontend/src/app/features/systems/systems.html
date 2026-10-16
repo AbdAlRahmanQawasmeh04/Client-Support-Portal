@@ -1,0 +1,15 @@
+<section class="systems-page">
+  <div class="heading"><div><p class="eyebrow">EXPLORE YOUR SUPPORT OPTIONS</p><h1>Our systems</h1><p class="muted">Browse the systems available for support. Select your system when creating a ticket.</p></div><a class="primary" routerLink="/my-tickets/new">＋ New ticket</a></div>
+  <section class="card" aria-label="Search systems"><label for="system-search">Search by system name</label><div class="search-row"><input #searchBox id="system-search" type="search" maxlength="200" placeholder="Find a system…" [value]="search()" (input)="search.set(searchBox.value)"><button type="button" [disabled]="!search()" (click)="search.set(''); searchBox.focus()">Clear</button></div></section>
+  <div class="heading results"><h2>Available systems</h2><button type="button" (click)="load()" [disabled]="loading()">↻ Refresh</button></div>
+  @if (error()) { <p class="error" role="alert">{{ error() }} <button type="button" (click)="load()" [disabled]="loading()">Retry</button></p> }
+  @if (loading()) { <p role="status">Loading systems…</p> }
+  @if (products() !== null) {
+    <p class="muted" role="status">{{ filtered().length }} of {{ products()?.length }} systems</p>
+    <div class="system-grid" [attr.aria-busy]="loading()">
+      @for (product of filtered(); track product.id) {
+        <article class="card system-card"><span class="system-icon" aria-hidden="true">▤</span><h2 dir="auto">{{ product.name }}</h2></article>
+      } @empty { <p class="card empty">{{ products()?.length ? 'No systems match your search. Try another name.' : 'No systems are available yet.' }}</p> }
+    </div>
+  }
+</section>

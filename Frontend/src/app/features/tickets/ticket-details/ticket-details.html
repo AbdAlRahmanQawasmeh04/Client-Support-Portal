@@ -1,0 +1,268 @@
+<div class="workspace">
+  <main>
+    <a class="back-link" routerLink="/my-tickets">← Back to my tickets</a>
+    @if (loading()) {
+      <p class="card" role="status">
+        Loading ticket…
+      </p>
+    } @else if (pageError()) {
+      <section class="card" role="alert">
+        <p class="error">{{ pageError() }}</p>
+
+        <button type="button" (click)="load()">
+          Try again
+        </button>
+      </section>
+    } @else if (ticket(); as item) {
+      <div class="heading">
+        <div>
+          <p class="eyebrow">SUPPORT REQUEST</p><p><a class="back-link" routerLink="/my-tickets/new">＋ Create another ticket</a></p>
+          <h1>Ticket #{{ item.id }}</h1>
+        </div>
+
+        <span
+          class="badge"
+          [class.closed]="item.status === 'Closed'"
+          [class.paused]="item.status === 'Paused'"
+          [class.assigned]="item.status === 'Assigned'"
+        >
+          {{ item.status }}
+        </span>
+      </div>
+
+      @if (item.status !== 'Closed') {
+        <p>
+          <button
+            type="button"
+            class="primary"
+            [disabled]="saving()"
+            [routerLink]="['/my-tickets', item.id, 'edit']"
+          >
+            Edit ticket
+          </button>
+        </p>
+      }
+
+      @if (actionError()) {
+        <p class="message error" role="alert">
+          {{ actionError() }}
+        </p>
+      }
+
+      @if (success()) {
+        <p class="message success" role="status">
+          {{ success() }}
+        </p>
+      }
+
+      <div class="layout">
+        <div>
+          <section class="card">
+            <h2>Problem description</h2>
+
+            <p class="content" dir="auto">
+              {{ item.problemDescription }}
+            </p>
+          </section>
+
+          <section class="card">
+            <h2>Conversation</h2>
+
+            @if (commentsBusy()) {
+              <p role="status">Loading comments…</p>
+            } @else if (commentsError()) {
+              <p class="error" role="alert">
+                {{ commentsError() }}
+              </p>
+
+              <button
+                type="button"
+                (click)="loadComments()"
+              >
+                Retry comments
+              </button>
+            } @else if (comments(); as page) {
+              @for (entry of page.items; track entry.id) {
+                <article class="comment">
+                  <div class="comment-heading">
+                    <div class="author"><span class="avatar" aria-hidden="true">{{ entry.authorName.slice(0, 1) }}</span><strong>{{ entry.authorName }}</strong></div>
+
+                    <small>
+                      #{{ entry.id }} ·
+                      {{ entry.createdAt | date:'medium' }}
+                    </small>
+                  </div>
+
+                  @if (entry.parentCommentId) {
+                    <small>
+                      Reply to comment #{{ entry.parentCommentId }}
+                    </small>
+                  }
+
+                  <p class="content" dir="auto">
+                    {{ entry.content }}
+                  </p>
+
+                  @if (item.status !== 'Closed') {
+                    <button
+                      type="button"
+                      class="reply"
+                      [disabled]="saving()"
+                      (click)="replyTo.set(entry)"
+                    >
+                      Reply
+                    </button>
+                  }
+                </article>
+              } @empty {
+                <p class="muted">No comments yet.</p>
+              }
+
+              @if (page.totalPages > 1) {
+                <nav
+                  class="pagination"
+                  aria-label="Comment pages"
+                >
+                  <button
+                    type="button"
+                    [disabled]="page.pageNumber <= 1"
+                    (click)="loadComments(page.pageNumber - 1)"
+                  >
+                    Previous
+                  </button>
+
+                  <span>
+                    {{ page.pageNumber }} / {{ page.totalPages }}
+                  </span>
+
+                  <button
+                    type="button"
+                    [disabled]="page.pageNumber >= page.totalPages"
+                    (click)="loadComments(page.pageNumber + 1)"
+                  >
+                    Next
+                  </button>
+                </nav>
+              }
+            }
+
+            @if (item.status === 'Closed') {
+              <p class="closed-note">
+                This ticket is closed.
+                Its conversation is read-only.
+              </p>
+            } @else {
+              <form
+                (submit)="$event.preventDefault(); sendComment()"
+              >
+                @if (replyTo(); as reply) {
+                  <div class="reply-note">
+                    Replying to {{ reply.authorName }}
+                    (#{{ reply.id }})
+
+                    <button
+                      type="button"
+                      [disabled]="saving()"
+                      (click)="replyTo.set(null)"
+                    >
+                      Cancel reply
+                    </button>
+                  </div>
+                }
+
+                <label for="comment">Your message</label>
+
+                <textarea
+                  id="comment" #messageInput dir="auto" aria-describedby="message-help"
+                  [formControl]="comment"
+                  [readOnly]="saving()"
+                  rows="4"
+                  maxlength="5000"
+                  placeholder="Write an update or reply…"
+                ></textarea>
+                <p id="message-help" class="muted composer-help">Share the details that will help your support team. {{ comment.value.length }} / 5000</p>
+
+                <button
+                  class="primary"
+                  type="submit"
+                  [disabled]="saving() || commentsBusy() || !comment.value.trim()"
+                >
+                  {{ saving() ? 'Please wait…' : 'Send comment' }}
+                </button>
+              </form>
+            }
+          </section>
+        </div>
+
+        <aside>
+          <section class="card">
+            <h2>Ticket information</h2>
+
+            <dl>
+              <dt>Product</dt>
+              <dd>{{ item.productName }}</dd>
+
+              <dt>Assigned to</dt>
+              <dd>
+                {{ item.assignedEmployeeName || 'Not assigned' }}
+              </dd>
+
+              <dt>Created</dt>
+              <dd>{{ item.createdAt | date:'mediumDate' }}</dd>
+
+              <dt>Solution confirmed</dt>
+              <dd>
+                {{ item.isConfirmedByClient ? 'Yes' : 'Not yet' }}
+              </dd>
+            </dl>
+          </section>
+
+          <section class="card">
+            <h2>Attachments</h2>
+
+            @for (file of item.attachments; track file.id) {
+              <button
+                class="attachment"
+                type="button"
+                [disabled]="downloading() !== null"
+                (click)="download(file)"
+              >
+                {{
+                  downloading() === file.id
+                    ? 'Downloading…'
+                    : 'Download: ' + file.fileName
+                }}
+              </button>
+            } @empty {
+              <p class="muted">No attachments.</p>
+            }
+          </section>
+
+          @if (
+            item.status !== 'Closed' &&
+            item.assignedEmployeeId &&
+            !item.isConfirmedByClient
+          ) {
+            <section class="card">
+              <h2>Is your issue fixed?</h2>
+
+              <p class="muted">
+                Confirm the solution when your issue is resolved.
+                Your support employee can then close the ticket.
+              </p>
+
+              <button
+                type="button"
+                class="primary"
+                [disabled]="saving()"
+                (click)="confirmSolution()"
+              >
+                Confirm solution
+              </button>
+            </section>
+          }
+        </aside>
+      </div>
+    }
+  </main>
+</div>

@@ -1,0 +1,83 @@
+<a class="skip-link" href="#client-content" (click)="$event.preventDefault(); content.focus()">Skip to content</a>
+<div class="portal-shell">
+  <aside class="sidebar" aria-label="Client workspace">
+    <a class="side-brand" routerLink="/my-tickets">
+      <span class="brand-mark" aria-hidden="true">S</span>
+      <span>Support Portal<small>CLIENT SUPPORT</small></span>
+    </a>
+    <p class="nav-label">YOUR WORKSPACE</p>
+    <nav class="side-nav" aria-label="Client navigation">
+      <a routerLink="/my-tickets" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page"><span aria-hidden="true">▦</span> My tickets <span class="arrow" aria-hidden="true">↗</span></a>
+      <a routerLink="/my-tickets/new" routerLinkActive="active" ariaCurrentWhenActive="page"><span aria-hidden="true">＋</span> New ticket <span class="arrow" aria-hidden="true">↗</span></a>
+    <a routerLink="/my-tickets/systems" routerLinkActive="active" ariaCurrentWhenActive="page"><span aria-hidden="true">▤</span> Systems <span class="arrow" aria-hidden="true">↗</span></a><a routerLink="/my-tickets/company" routerLinkActive="active" ariaCurrentWhenActive="page"><span aria-hidden="true">ⓘ</span> About &amp; Contact <span class="arrow" aria-hidden="true">↗</span></a><a routerLink="/my-tickets/account" routerLinkActive="active" ariaCurrentWhenActive="page"><span aria-hidden="true">⚙</span> My account <span class="arrow" aria-hidden="true">↗</span></a></nav>
+    <div class="sidebar-note">
+      <span class="note-icon" aria-hidden="true">✧</span>
+      <h2>We're here<br>to help you.</h2>
+      <p>Submit requests, track progress, and stay connected with your support team.</p>
+      <a routerLink="/my-tickets/new">Let's solve it <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="side-account">
+      @if (accountPhoto() && !avatarFailed()) {
+        <img class="profile-photo" [src]="accountPhoto()" alt="Your profile photo" (error)="avatarFailed.set(true)">
+      } @else {
+        <span class="avatar" aria-hidden="true">{{ auth.user()?.fullName?.slice(0, 1) }}</span>
+      }
+      <div><strong>{{ auth.user()?.fullName }}</strong><small>Client account</small></div>
+    </div>
+  </aside>
+  <div class="portal-body">
+<header class="topbar">
+  <div class="top-title"><span>Support workspace</span><strong>Here to help you move forward.</strong></div>
+  <div class="tools">
+    <div class="top-account">@if (accountPhoto() && !avatarFailed()) {
+        <img class="profile-photo" [src]="accountPhoto()" alt="Your profile photo" (error)="avatarFailed.set(true)">
+      } @else {
+        <span class="avatar" aria-hidden="true">{{ auth.user()?.fullName?.slice(0, 1) }}</span>
+      }<span><strong>{{ auth.user()?.fullName }}</strong><small>Client account</small></span></div>
+    <div class="notifications" (keydown.escape)="opened.set(false); bell.focus()">
+      <button #bell type="button" class="bell" (click)="toggle()" [attr.aria-expanded]="opened()" aria-controls="notifications-panel" aria-label="Notifications">
+        <svg class="bell-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M9 21h6"/></svg> <span class="bell-label">Notifications</span>
+        <span class="count" [class.has-unread]="(unread() ?? 0) > 0">{{ unread() === null ? '?' : unread() }}</span>
+      </button>
+      @if (opened()) {
+        <section id="notifications-panel" class="panel" aria-label="Notifications">
+          <div class="panel-heading"><h2>Notifications</h2><button type="button" (click)="opened.set(false); bell.focus()" aria-label="Close notifications">×</button></div>
+          <p class="sync-note">Updates every 30 seconds. Refresh to check now.</p><div class="panel-actions">
+            <button type="button" [disabled]="busy() || loading()" (click)="load()">Refresh</button>
+            <button type="button" [disabled]="busy() || loading() || unread() === 0" (click)="markAllRead()">Mark all as read</button>
+          </div>
+          @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+          @if (loading()) {
+            <p class="notice" role="status">Loading notifications…</p>
+          } @else if (result(); as page) {
+            <div class="items">
+              @for (item of page.items; track item.id) {
+                <button type="button" class="item" [class.unread]="!item.isRead" [disabled]="busy()" (click)="openNotification(item)">
+                  <span class="message">{{ item.message }}</span>
+                  <small>{{ item.createdAt | date:'mediumDate' }} · {{ item.isRead ? 'Read' : 'Unread' }}</small>
+                  @if (item.ticketId) { <small>Ticket #{{ item.ticketId }} →</small> }
+                </button>
+              } @empty { <p class="notice">No notifications yet.</p> }
+            </div>
+            @if (page.totalPages > 1) {
+              <nav class="pages" aria-label="Notification pages">
+                <button type="button" [disabled]="busy() || page.pageNumber <= 1" (click)="load(page.pageNumber - 1)">Previous</button>
+                <span>{{ page.pageNumber }} / {{ page.totalPages }}</span>
+                <button type="button" [disabled]="busy() || page.pageNumber >= page.totalPages" (click)="load(page.pageNumber + 1)">Next</button>
+              </nav>
+            }
+          }
+        </section>
+      }
+    </div>
+    <button type="button" class="sign-out" (click)="logout()">Sign out <span aria-hidden="true">↗</span></button>
+  </div>
+</header><p class="sr-only" role="status" aria-live="polite">{{ notificationNotice() }}</p>
+<div #content id="client-content" tabindex="-1"><router-outlet></router-outlet></div>
+</div></div>
+
+
+
+
+
+

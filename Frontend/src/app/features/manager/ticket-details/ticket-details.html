@@ -1,0 +1,19 @@
+<div class="workspace"><main>
+<a class="back-link" routerLink="/manager/tickets">← Back to all tickets</a>
+@if(loading()){<p class="card" role="status">Loading ticket…</p>}
+@else if(pageError()){<div class="card" role="alert">{{pageError()}} <button (click)="load()">Retry</button></div>}
+@else if(ticket();as item){
+<div class="heading"><h1>Ticket #{{item.id}}</h1><span class="badge" [class.closed]="item.status==='Closed'">{{item.status}}</span></div>
+<div class="layout"><div>
+<section class="card"><h2>Problem description</h2><p class="description" dir="auto">{{item.problemDescription}}</p></section>
+<section class="card"><h2>Conversation</h2><p>Manager view · Read-only</p>
+@if(commentsBusy()){<p role="status">Loading comments…</p>}
+@if(commentsError()){<p role="alert">{{commentsError()}} <button (click)="loadComments()">Retry</button></p>}
+@if(comments();as page){
+@for(comment of page.items;track comment.id){<article class="comment"><strong dir="auto">{{comment.authorName}}</strong><p><small>#{{comment.id}} · {{comment.createdAt|date:'medium'}} @if(comment.parentCommentId){ · Reply to #{{comment.parentCommentId}}}</small></p><p dir="auto" style="white-space:pre-wrap;overflow-wrap:anywhere">{{comment.content}}</p></article>}@empty{<p>No comments yet.</p>}
+@if(page.totalPages>1){<nav aria-label="Comment pages"><button [disabled]="commentsBusy() || page.pageNumber<=1" (click)="loadComments(page.pageNumber-1)">Previous</button> {{page.pageNumber}} / {{page.totalPages}} <button [disabled]="commentsBusy() || page.pageNumber>=page.totalPages" (click)="loadComments(page.pageNumber+1)">Next</button></nav>}}
+</section></div><aside>
+<section class="card"><h2>Ticket information</h2><dl><dt>Client</dt><dd dir="auto">{{item.clientName}}</dd><dt>Product</dt><dd dir="auto">{{item.productName}}</dd><dt>Assigned to</dt><dd dir="auto">{{item.assignedEmployeeName || 'Not assigned'}}</dd><dt>Created</dt><dd>{{item.createdAt|date:'medium'}}</dd><dt>Solution ready</dt><dd>{{item.isResolvedByEmployee?'Yes':'Not yet'}}</dd><dt>Client confirmed</dt><dd>{{item.isConfirmedByClient?'Yes':'Not yet'}}</dd></dl></section>
+<section class="card"><h2>Attachments</h2>@if(actionError()){<p role="alert">{{actionError()}}</p>}@for(file of item.attachments;track file.id){<p><button style="max-width:100%;overflow-wrap:anywhere" [disabled]="downloading()!==null" (click)="download(file)">{{downloading()===file.id?'Downloading…':file.fileName}}</button></p>}@empty{<p>No attachments.</p>}</section>
+</aside></div>}
+</main></div>

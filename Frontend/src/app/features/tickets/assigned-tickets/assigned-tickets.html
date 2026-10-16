@@ -1,0 +1,114 @@
+
+    
+
+    <main>
+      <p class="eyebrow">EMPLOYEE WORKSPACE</p>
+
+      <h1>Assigned tickets</h1>
+
+      <p>View the support requests assigned to you.</p>
+
+      <button
+        type="button"
+        [disabled]="loading()"
+        (click)="load(page())"
+      >
+        Refresh
+      </button>
+
+      <section>
+        @if (loading()) {
+          <p role="status">Loading tickets…</p>
+        } @else if (error()) {
+          <p role="alert" class="error">
+            {{ error() }}
+          </p>
+
+          <button type="button" (click)="load(page())">
+            Try again
+          </button>
+        } @else if (result(); as data) {
+          <h2>
+            Support requests · {{ data.totalCount }} total
+          </h2>
+
+          @if (data.items.length === 0) {
+            <p>No tickets on this page.</p>
+          } @else {
+            <div class="table-scroll" role="region" aria-label="Assigned tickets table" tabindex="0">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Ticket</th>
+                    <th>Client</th>
+                    <th>Product</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  @for (ticket of data.items; track ticket.id) {
+                    <tr>
+                      <td>
+                        <a
+                          [routerLink]="['/assigned-tickets', ticket.id]"
+                        >
+                          #{{ ticket.id }}
+                        </a>
+                      </td>
+
+                      <td>{{ ticket.clientName }}</td>
+
+                      <td dir="auto">
+                        {{ ticket.productName }}
+                      </td>
+
+                      <td dir="auto">
+                        {{ ticket.problemDescription }}
+                      </td>
+
+                      <td>
+                        <span class="status" [class.closed]="ticket.status === 'Closed'" [class.paused]="ticket.status === 'Paused'" [class.assigned]="ticket.status === 'Assigned'">
+                          {{ ticket.status }}
+                        </span>
+                      </td>
+
+                      <td>
+                        {{ ticket.createdAt | date:'mediumDate' }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+          @if (data.totalPages > 1) {
+            <nav aria-label="Ticket pages">
+              <button
+                type="button"
+                [disabled]="data.pageNumber <= 1"
+                (click)="load(data.pageNumber - 1)"
+              >
+                Previous
+              </button>
+
+              <span>
+                Page {{ data.pageNumber }} / {{ data.totalPages }}
+              </span>
+
+              <button
+                type="button"
+                [disabled]="data.pageNumber >= data.totalPages"
+                (click)="load(data.pageNumber + 1)"
+              >
+                Next
+              </button>
+            </nav>
+          }
+        }
+      </section>
+    </main>
+  
